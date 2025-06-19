@@ -1,0 +1,7 @@
+*.o
+*.a
+*.pyc
+#executable
+test_vb2 
+#Buffer files
+*.vb2 
