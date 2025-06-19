@@ -2,8 +2,9 @@
 CC = gcc
 TARGET = test_vb2
 LENGTH ?= 100
+EXTRA_VARS ?= 0
 
-CFLAGS = -Wall -Wextra -O2 -DTEST_RECORD_LENGTH=$(LENGTH)
+CFLAGS = -Wall -Wextra -O2 -DTEST_RECORD_LENGTH=$(LENGTH) -DTEST_EXTRA_VARS=$(EXTRA_VARS)
 
 SOURCES = $(wildcard *.c)
 SOURCES += $(wildcard src/*.c)
@@ -14,9 +15,13 @@ INCLUDES = -I. \
 
 default: $(TARGET)
 
+.PHONY: default clean
+
+.PHONY: $(OBJECTS)
 $(OBJECTS): %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
+.PHONY: $(TARGET)
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $(OBJECTS)
 

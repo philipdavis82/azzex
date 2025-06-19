@@ -6,6 +6,10 @@
     #define TEST_RECORD_LENGTH 100 // Default number of records to test
 #endif
 
+#ifndef TEST_EXTRA_VARS
+    #define TEST_EXTRA_VARS 0 // Default number of extra variables to test
+#endif
+
 int main(int, char **){
     vb2_init(); // Initialize the variable buffer system
     printf("Variable Buffer 2 Test Length = %d\n", TEST_RECORD_LENGTH);
@@ -22,7 +26,7 @@ int main(int, char **){
     float var2  = 3.14f;
     double var3 = 2.718281828459045;
 
-    double LotsOVars[100]; // Example of an array variable
+   
 
     // Track the variables with their metadata
     // The type is a string that describes the type of the variable
@@ -31,11 +35,14 @@ int main(int, char **){
     vb2_track_variable(&var2, "var2", "units", "description", VB2_FLOAT); // float
     vb2_track_variable(&var3, "var3", "units", "description", VB2_DOUBLE); // double
     
-    for(int i = 0; i < 100; i++) {
+    #if TEST_EXTRA_VARS 
+    double LotsOVars[TEST_EXTRA_VARS]; // Example of an array variable
+    for(int i = 0; i < TEST_EXTRA_VARS; i++) {
         char name[32];
         snprintf(name, sizeof(name), "LotsOVars[%d]", i);
         vb2_add_variable(name , "units", "description", VB2_DOUBLE, &LotsOVars[i], sizeof(LotsOVars[i]));
     }
+    #endif
 
     vb2_start(TEST_RECORD_LENGTH); // Start recording with a maximum history of 100
     vb2_record_all(); // Record all tracked variables
