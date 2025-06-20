@@ -10,6 +10,10 @@
     #define VB_MAX_VAR_SIZE 8 // Maximum size of a variable in bytes
 #endif
 
+#ifndef VB_BUFFER_SIZE
+    #define VB_BUFFER_SIZE 0x1000 // Buffer size of 1 page
+#endif
+
 #ifdef VB2_DEBUG_ENABLED
     #define VB_DEBUG(fmt, ...) printf("DEBUG[%d]: " fmt "\n", __LINE__, ##__VA_ARGS__)
 #else
@@ -57,10 +61,12 @@ struct VB_Header {
 };
 
 struct VB_Block_Proxy{
-    struct VB_Header header;   // Header information for the variable buffer
-    void    *var_ptr;          // Pointer to the data of the variable
-    uint8_t  var_size;         // Size of the data in bytes
-    size_t   offset;            // Offset of the memory block in the file
+    struct VB_Header header;            // Header information for the variable buffer
+    void    *var_ptr;               // Pointer to the data of the variable
+    uint8_t  var_size;              // Size of the data in bytes
+    size_t   offset;                    // Offset of the memory block in the file
+    uint8_t  buffer[VB_BUFFER_SIZE+VB_MAX_VAR_SIZE];// Buffer to hold the variable data
+    size_t   buffer_offset;          // Current offset in the buffer for writing data
 };
 
 struct VB_File{
@@ -173,6 +179,22 @@ void vb2_start(size_t max_history){
     }
 }
 
+void vb2_flush_all() {
+    if (vb_file.fp == NULL || vb_file.blocks == NULL) {
+        return; // File not open or no blocks to flush
+    }
+    for (size_t i = 0; i < vb_file.block_count; i++) {
+        struct VB_Block_Proxy *block = &vb_file.blocks[i];
+        if (block->buffer_offset > 0) { // If there is data in the buffer
+            fseek(vb_file.fp, block->offset, SEEK_SET); // Seek to the variable's offset in the file
+            fwrite(block->buffer, block->buffer_offset, 1, vb_file.fp); // Write the buffer to the file
+            VB_DEBUG("Flushed %zu bytes to file for variable: %s", block->buffer_offset, block->header.name);
+            block->offset += block->buffer_offset; // Update the offset for the next write
+            block->buffer_offset = 0; // Reset the buffer offset
+        }
+    }
+}
+
 void vb2_record_all() {
     if (vb_file.fp == NULL || vb_file.blocks == NULL) {
         return; // File not open or no blocks to record
@@ -183,11 +205,20 @@ void vb2_record_all() {
     }
     for (size_t i = 0; i < vb_file.block_count; i++) {
         struct VB_Block_Proxy *block = &vb_file.blocks[i];
-        VB_DEBUG("Recording variable: %s, size: %d, offset: %zu", block->header.name, block->var_size, block->offset);
+        VB_DEBUG("Recording variable: %s, size: %d, offset: %zu", block->header.name, (int)block->var_size, block->offset);
         if (block->var_ptr != NULL && block->var_size > 0) {
-            fseek(vb_file.fp, block->offset, SEEK_SET);
-            fwrite(block->var_ptr, block->var_size, 1, vb_file.fp); // Write the variable data to the file
-            block->offset += block->var_size; // Update the offset for the next write
+            memcpy(block->buffer + block->buffer_offset, block->var_ptr, block->var_size); // Copy the variable data to the buffer
+            block->buffer_offset += block->var_size; // Update the buffer offset for the next write
+            if (block->buffer_offset >= VB_BUFFER_SIZE) {
+                fseek(vb_file.fp, block->offset, SEEK_SET); // Seek to the variable's offset in the file
+                fwrite(block->buffer, block->buffer_offset, 1, vb_file.fp); // Write the buffer to the file
+                VB_DEBUG("Wrote %zu bytes to file for variable: %s", block->buffer_offset, block->header.name);
+                block->offset += block->buffer_offset; // Update the offset for the next write
+                block->buffer_offset = 0; // Reset the buffer offset if it exceeds the buffer size
+            }
+            // fseek(vb_file.fp, block->offset, SEEK_SET);
+            // fwrite(block->var_ptr, block->var_size, 1, vb_file.fp); // Write the variable data to the file
+            // block->offset += block->var_size; // Update the offset for the next write
             block->header.count ++; // Increment the count of recorded data
         }
     }
@@ -196,6 +227,7 @@ void vb2_record_all() {
 
 void vb2_end() {
     VB_DEBUG("Ending recording session, current history: %zu, max history: %zu", vb_file.current_history, vb_file.max_history);\
+    vb2_flush_all(); // Flush all recorded data to the file
     vb2_save_var_headers(); // Save the variable headers to the file
     if (vb_file.fp != NULL) {
         fclose(vb_file.fp);
