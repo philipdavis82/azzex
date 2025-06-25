@@ -11,6 +11,41 @@
 #endif
 
 int main(int, char **){
+
+    /* Example
+    vb2_init(); // Initialize the variable buffer system
+    vb2_open("test.vb2"); // Open the variable buffer file
+    
+    // In the giant for loop 
+    // There should be all the information there
+    for {for {for {
+        char *typstr;
+        char *name;
+        void *variable;
+        if(typestr == "int" || typestr == "enum"){
+            (double) *(int *)variable;
+            vb2_add_variable(name,"nan","nan", "int", variable, sizeof(int));
+        }
+        else if(typestr == "double"){
+            *(double *)variable;
+            vb2_add_variable(name,"nan","nan", "double", variable, sizeof(double));
+        }
+    }}}
+
+    
+    vb2_start(/Number Of loops/ (100000+100));
+    
+    do {
+        // DO STUFF HERE
+        vb2_record_all(); // Record all tracked variables
+    } while (running);
+
+    vb2_end(); // End the recording session
+    vb2_close(); // Close the variable buffer file and free resources
+    */
+
+
+
     vb2_init(); // Initialize the variable buffer system
     printf("Variable Buffer 2 Test Length = %d\n", TEST_RECORD_LENGTH);
 
@@ -31,6 +66,9 @@ int main(int, char **){
     // The type is a string that describes the type of the variable
     // Current Available types are "int", "float", "double", "long"
     // Example without using vb2_track_variable macro
+
+    
+
     vb2_add_variable("var1", "units", "description", "int", (void *)(&var1), sizeof(int)); // int
     vb2_track_variable(&var2, "var2", "units", "description", VB2_FLOAT); // float
     vb2_track_variable(&var3, "var3", "units", "description", VB2_DOUBLE); // double
