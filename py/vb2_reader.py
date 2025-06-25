@@ -85,7 +85,6 @@ class VB2Reader:
         else:
             self.mmap_obj = mmap.mmap(self.file.fileno(), 0, flags=mmap.ACCESS_READ, prot=mmap.PROT_READ)
         self.master_header = VB2MasterHeader.from_buffer_copy(self.mmap_obj, 0)
-        print(self.master_header)
         self.get_all_vars()
 
     def close(self):
@@ -101,7 +100,6 @@ class VB2Reader:
         for i in range(self.master_header.block_count):
             offset = ctypes.sizeof(VB2MasterHeader) + i * ctypes.sizeof(VB2Header)
             header = VB2Header.from_buffer_copy(self.mmap_obj, offset)
-            print(header)
             self.vars[header.name] = header
     
     def __getitem__(self, key):

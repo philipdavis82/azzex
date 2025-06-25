@@ -10,6 +10,8 @@
     #define TEST_EXTRA_VARS 0 // Default number of extra variables to test
 #endif
 
+
+
 int main(int, char **){
 
     /* Example
@@ -95,6 +97,7 @@ int main(int, char **){
 
 
     {
+        #ifndef TEST_NO_EXTRA_FILE
         // ===============================================================
         // second session to record to another file
         // Note: this is just an example to show that you can record to multiple files
@@ -117,6 +120,7 @@ int main(int, char **){
         }
         vb2_end(); // End the recording session
         // ===============================================================
+        #endif
     }
 
 

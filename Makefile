@@ -3,12 +3,16 @@ CC = gcc
 TARGET = test_vb2
 LENGTH ?= 100
 EXTRA_VARS ?= 0
+NO_EXTRA_FILE ?= 0
 DEBUG ?= 0
 
 
 CFLAGS = -Wall -Wextra -O2 -DTEST_RECORD_LENGTH=$(LENGTH) -DTEST_EXTRA_VARS=$(EXTRA_VARS)
 ifeq ($(DEBUG), 1)
     CFLAGS += -DVB2_DEBUG_ENABLED
+endif
+ifeq ($(NO_EXTRA_FILE), 1)
+    CFLAGS += -DTEST_NO_EXTRA_FILE
 endif
 
 SOURCES = $(wildcard *.c)

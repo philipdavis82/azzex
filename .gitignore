@@ -5,3 +5,4 @@
 test_vb2 
 #Buffer files
 *.vb2 
+.vscode
