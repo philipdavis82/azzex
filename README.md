@@ -8,6 +8,12 @@ For future improvements add a page size to the `VB_Block_Proxy` struct to buffer
 
 Only 1 file can be open per processes.
 
+## How to download
+
+```bash
+git clone https://github.com/philipdavis82/azzex
+```
+
 ## How to test
 
 ### Simple 
