@@ -1,6 +1,6 @@
 # Simple Column Wise Variable Logger
 
-Tracks static variable pointers for a defined time and saves it to a file. Made in an hour or so.
+Tracks static variable pointers for a defined time and saves it to a file. 
 
 ## How to download
 
