@@ -32,4 +32,4 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
-	rm -f test.vb2
+	rm -f test.vb2 test2.vb2

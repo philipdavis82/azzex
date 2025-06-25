@@ -134,7 +134,7 @@ if __name__ == "__main__":
         print("Numpy is not installed, This example requires numpy to run.")
         sys.exit(1)
     parser = argparse.ArgumentParser(description="Read VB2 files and extract variables.")
-    parser.add_argument('filename', type=str, help='Path to the VB2 file to read', default='test.vb2')
+    parser.add_argument('filename', type=str, help='Path to the VB2 file to read', default='test.vb2', nargs='?')
     args = parser.parse_args()
     # Example usage
     import matplotlib.pyplot as plt
