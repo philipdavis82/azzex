@@ -42,7 +42,7 @@
 [    ...    ]
 
 */
-
+#pragma pack(push, 8) // Ensure standard 8-byte alignment for the structures
 struct VB_Master_Header {
     char     magic[4];        // Magic number to identify the file type
     size_t   version;         // Version of the file format
@@ -78,8 +78,11 @@ struct VB_File{
     size_t   max_history;
     size_t   current_history;           // Current size of the history buffer
 };
+#pragma pack(pop) // Restore the previous packing alignment
 
 struct VB_File vb_file;
+
+
 
 void vb2_init() {
     VB_DEBUG("Initializing variable buffer system");
@@ -96,14 +99,17 @@ int vb2_open(const char *filename) {
     strncpy(vb_file.filename, filename, sizeof(vb_file.filename) - 1);
     vb_file.filename[sizeof(vb_file.filename) - 1] = '\0'; // Ensure null termination
 
-    
+    if(vb_file.fp != NULL) {
+        fclose(vb_file.fp); // Close any previously opened file
+        vb_file.fp = NULL;
+    }
+
     vb_file.fp = fopen(vb_file.filename, "wb");
     if (vb_file.fp == NULL) {
         VB_DEBUG("Failed to open file: %s", vb_file.filename);
         return -1; // Failed to open file
     }
 
-    vb_file.block_count = 0;
     return 0; // Success
 }
 
@@ -216,26 +222,28 @@ void vb2_record_all() {
                 block->offset += block->buffer_offset; // Update the offset for the next write
                 block->buffer_offset = 0; // Reset the buffer offset if it exceeds the buffer size
             }
-            // fseek(vb_file.fp, block->offset, SEEK_SET);
-            // fwrite(block->var_ptr, block->var_size, 1, vb_file.fp); // Write the variable data to the file
-            // block->offset += block->var_size; // Update the offset for the next write
             block->header.count ++; // Increment the count of recorded data
         }
     }
     vb_file.current_history++; // Increment the current history size
 }
 
+void vb2_reset() {
+    VB_DEBUG("Resetting variable buffer system");
+    vb_file.current_history = 0; // Reset the current history size
+    for(size_t i = 0; i < vb_file.block_count; i++) {
+        struct VB_Block_Proxy *block = &vb_file.blocks[i];
+        block->buffer_offset = 0; // Reset the buffer offset for each block
+        block->offset = block->header.offset; // Reset the offset to the initial value
+        block->header.count = 0; // Reset the count of recorded data
+        block->buffer_offset = 0; // Reset the buffer offset
+    }
+}
+
 void vb2_end() {
     VB_DEBUG("Ending recording session, current history: %zu, max history: %zu", vb_file.current_history, vb_file.max_history);\
     vb2_flush_all(); // Flush all recorded data to the file
     vb2_save_var_headers(); // Save the variable headers to the file
-    if (vb_file.fp != NULL) {
-        fclose(vb_file.fp);
-        vb_file.fp = NULL;
-    }
-    if (vb_file.blocks != NULL) {
-        free(vb_file.blocks);
-        vb_file.blocks = NULL;
-    }
-    vb_file.block_count = 0; // Reset the block count
+    vb2_reset(); // Reset the variable buffer system for the next recording session
+    // Safe to open new file or continue recording
 }

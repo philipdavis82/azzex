@@ -27,11 +27,11 @@ int main(int, char **){
     double var3 = 2.718281828459045;
 
    
-
     // Track the variables with their metadata
     // The type is a string that describes the type of the variable
     // Current Available types are "int", "float", "double", "long"
-    vb2_track_variable(&var1, "var1", "units", "description", VB2_INT);   // int 
+    // Example without using vb2_track_variable macro
+    vb2_add_variable("var1", "units", "description", "int", (void *)(&var1), sizeof(int)); // int
     vb2_track_variable(&var2, "var2", "units", "description", VB2_FLOAT); // float
     vb2_track_variable(&var3, "var3", "units", "description", VB2_DOUBLE); // double
     
@@ -44,6 +44,7 @@ int main(int, char **){
     }
     #endif
 
+    // Start the recording session
     vb2_start(TEST_RECORD_LENGTH); // Start recording with a maximum history of 100
     vb2_record_all(); // Record all tracked variables
     for(int i = 0; i < TEST_RECORD_LENGTH; i++) {
@@ -53,7 +54,35 @@ int main(int, char **){
         vb2_record_all(); // Record all tracked variables
     }
     vb2_end(); // End the recording session
-    vb2_close(); // Close the variable buffer file
+
+
+    {
+        // ===============================================================
+        // second session to record to another file
+        // Note: this is just an example to show that you can record to multiple files
+        // ===============================================================
+        if (vb2_open("test2.vb2") != 0) {
+            printf("Failed to open variable buffer file.\n");
+            return -1; // Failed to open the variable buffer file
+        }
+
+        vb2_start(TEST_RECORD_LENGTH); // Start recording with a maximum history of 100
+        var1 = 0; // Reset the variable to record
+        var2 = 0; // Reset the variable to record
+        var3 = 0; // Reset the variable to record
+        vb2_record_all(); // Record all tracked variables
+        for(int i = 0; i < TEST_RECORD_LENGTH; i++) {
+            var1 -= i; // Modify the variable to record
+            var2 -= 0.1f * i; // Modify the variable to record
+            var3 -= 0.01 * i; // Modify the variable to record
+            vb2_record_all(); // Record all tracked variables
+        }
+        vb2_end(); // End the recording session
+        // ===============================================================
+    }
+
+
+    vb2_close(); // Close the variable buffer file and free resources
     // Cleanup and exit
     return 0;
 }
