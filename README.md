@@ -41,10 +41,10 @@ Quick performance testing. Done in the wsl2 vm. Should be faster in native os.
 
 ### Read/Write Time
 
-![](testing/save_read_timer.svg)
+![](testing/media/save_read_timer.svg)
 
 ### Read Only Time
 
-![](testing/read_timer.svg)
+![](testing/media/read_timer.svg)
 
 
