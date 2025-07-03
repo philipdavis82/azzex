@@ -55,6 +55,9 @@ int main(int, char **){
         printf("Failed to open variable buffer file.\n");
         return -1; // Failed to open the variable buffer file
     }
+    // vb2_enable_log(); // Enable logging to a file
+    // vb_log_set_level(VB_LOG_WARNING); // Set the log level to INFO
+    // vb_log_set_echo(1, 1); // Set to echo logs
 
     // Variables MUST be available in the scope of the recording
     // They will be recorded by reference, so they must not go out of scope
@@ -70,6 +73,7 @@ int main(int, char **){
     // Example without using vb2_track_variable macro
 
     
+    VB_INFO("Tracking variables: var1 (int), var2 (float), var3 (double)");
 
     vb2_add_variable("var1", "units", "description", "int", (void *)(&var1), sizeof(int)); // int
     vb2_track_variable(&var2, "var2", "units", "description", VB2_FLOAT); // float
@@ -86,14 +90,19 @@ int main(int, char **){
 
     // Start the recording session
     vb2_start(TEST_RECORD_LENGTH); // Start recording with a maximum history of 100
+    VB_DEBUG("Recording session started with max history: %d", TEST_RECORD_LENGTH);\
     vb2_record_all(); // Record all tracked variables
+    VB_WARNING("Recording all tracked variables at the start of the session");
     for(int i = 0; i < TEST_RECORD_LENGTH; i++) {
         var1 += i; // Modify the variable to record
         var2 += 0.1f * i; // Modify the variable to record
         var3 += 0.01 * i; // Modify the variable to record
+        VB_DEBUG("Recording variables at iteration %d: var1 = %d, var2 = %f, var3 = %lf", i, var1, var2, var3);
         vb2_record_all(); // Record all tracked variables
     }
+    VB_ERROR("Recording session completed, total iterations: %d", TEST_RECORD_LENGTH);
     vb2_end(); // End the recording session
+    VB_FATAL("Recording session ended, closing the variable buffer file");
 
 
     {

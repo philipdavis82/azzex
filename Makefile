@@ -7,7 +7,7 @@ NO_EXTRA_FILE ?= 0
 DEBUG ?= 0
 
 
-CFLAGS = -Wall -Wextra -O2 -DTEST_RECORD_LENGTH=$(LENGTH) -DTEST_EXTRA_VARS=$(EXTRA_VARS)
+CFLAGS = -Wall -Wextra -g -O2 -DTEST_RECORD_LENGTH=$(LENGTH) -DTEST_EXTRA_VARS=$(EXTRA_VARS)
 ifeq ($(DEBUG), 1)
     CFLAGS += -DVB2_DEBUG_ENABLED
 endif
@@ -36,4 +36,4 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
-	rm -f test.vb2 test2.vb2
+	rm -f test.vb2 test2.vb2 test.vb2.log test2.vb2.log

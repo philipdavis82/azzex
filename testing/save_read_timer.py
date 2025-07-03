@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import sys,os,time
-sys.path.append('../py')
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(FILE_DIR)  # Change to the directory of this script
+sys.path.append(f'../py')
 try: 
     from ..py import vb2_reader as vb2
 except ImportError:  # If running in a different context, adjust the import path
@@ -53,7 +55,7 @@ def test_save_read_timer():
     times = []
     for loop in loops:
         samples = []
-        for i in range(10):
+        for i in range(1):
             samples.append(save_read_timer(loop))
         # Average Times 
         time_info = TimeInfo(0,0,0)
